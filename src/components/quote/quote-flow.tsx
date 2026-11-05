@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import type { Schemas } from '@/lib/api';
 import { localIsoDate } from '@/lib/dates';
 import type { Flags } from '@/lib/flags';
+import type { ReactNode } from 'react';
 import { CheckingEligibility } from './checking-eligibility';
+import { GreyFrame } from './grey-frame';
 import { IneligiblePanel } from './ineligible-panel';
 import { QuoteWizard } from './quote-wizard';
 import { defaultQuoteServices, type QuoteServices } from './services';
@@ -21,6 +23,8 @@ interface QuoteFlowProps {
   flags: Flags;
   minDelayMs: number;
   services?: QuoteServices;
+  title?: string;
+  topRight?: ReactNode;
 }
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -31,6 +35,8 @@ function QuoteFlow({
   flags,
   minDelayMs,
   services = defaultQuoteServices,
+  title = 'Get a quote',
+  topRight,
 }: QuoteFlowProps) {
   const [phase, setPhase] = useState<Phase>({ name: 'checking' });
   const [asOf] = useState(localIsoDate);
@@ -53,18 +59,24 @@ function QuoteFlow({
     };
   }, [carrierId, customerId, asOf, minDelayMs, services]);
 
+  const frame = (content: ReactNode) => (
+    <GreyFrame title={title} backHref="/" right={topRight}>
+      {content}
+    </GreyFrame>
+  );
+
   switch (phase.name) {
     case 'checking':
-      return flags.eligibilityLoadingStep ? <CheckingEligibility /> : null;
+      return flags.eligibilityLoadingStep ? frame(<CheckingEligibility />) : null;
     case 'ineligible':
-      return (
-        <IneligiblePanel reasons={phase.reasons} showReasons={flags.showIneligibilityReasons} />
+      return frame(
+        <IneligiblePanel reasons={phase.reasons} showReasons={flags.showIneligibilityReasons} />,
       );
     case 'error':
-      return (
-        <p role="alert" className="rounded-lg bg-red-50 p-4 text-red-800">
+      return frame(
+        <p role="alert" className="message-negative">
           {phase.message}
-        </p>
+        </p>,
       );
     case 'form':
       return (
@@ -74,6 +86,9 @@ function QuoteFlow({
           asOf={asOf}
           services={services}
           onIneligible={(reasons) => setPhase({ name: 'ineligible', reasons })}
+          showCarrierRequest={flags.showCarrierRequest}
+          title={title}
+          topRight={topRight}
         />
       );
   }

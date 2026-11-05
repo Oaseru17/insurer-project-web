@@ -1,3 +1,4 @@
+import { maskDate } from '@/lib/form/date-mask';
 import { describedBy, ErrorText, fieldIds, Hint, Label } from '../field-shell';
 import type { FieldOf, FieldProps } from './types';
 
@@ -14,32 +15,37 @@ function autoComplete(field: TextLike): string | undefined {
   return undefined;
 }
 
-// Dates are typed in the carrier's own format (e.g. MM/DD/YYYY); native date pickers are
-// awkward for birth dates and would need converting back.
+// Dates are typed in the carrier's own format; separators are filled in as the customer types.
 function TextField({ field, value, onChange, hint, error }: FieldProps<TextLike>) {
   const ids = fieldIds(field.key);
   const formatHint = field.type === 'date' ? `Format: ${field.format}` : undefined;
   const fullHint = [formatHint, hint].filter(Boolean).join('. ') || undefined;
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor={ids.input} optional={!field.required}>
+    <div>
+      <Label htmlFor={ids.input} required={field.required}>
         {field.label}
       </Label>
       <Hint id={ids.hint} text={fullHint} />
-      <ErrorText id={ids.error} text={error} />
       <input
         id={ids.input}
         name={field.key}
         type={INPUT_TYPE[field.type]}
-        inputMode={field.type === 'date' ? 'numeric' : undefined}
+        inputMode={field.type === 'date' ? 'numeric' : field.type === 'tel' ? 'tel' : undefined}
+        placeholder={field.type === 'date' ? field.format : undefined}
+        maxLength={field.type === 'date' ? field.format.length : undefined}
         autoComplete={autoComplete(field)}
         value={typeof value === 'string' ? value : ''}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) =>
+          onChange(
+            field.type === 'date' ? maskDate(event.target.value, field.format) : event.target.value,
+          )
+        }
         required={field.required}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(ids, fullHint, error)}
-        className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 aria-invalid:border-red-600"
+        className="input"
       />
+      <ErrorText id={ids.error} text={error} />
     </div>
   );
 }

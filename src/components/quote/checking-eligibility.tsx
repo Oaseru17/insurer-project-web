@@ -1,11 +1,11 @@
 function CheckingEligibility() {
   return (
-    <div role="status" aria-live="polite" className="flex items-center gap-3 py-10 text-slate-700">
-      <span
-        aria-hidden="true"
-        className="size-5 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600"
-      />
-      Checking eligibility…
+    <div role="status" aria-live="polite" className="message-info animate-enter items-center">
+      <span className="loader size-8 shrink-0 text-info-text" aria-hidden="true" />
+      <div>
+        <p className="font-bold">Checking eligibility…</p>
+        <p>Making sure Harbor can quote you before we ask anything.</p>
+      </div>
     </div>
   );
 }

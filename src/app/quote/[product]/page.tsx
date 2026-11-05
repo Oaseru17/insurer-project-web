@@ -21,19 +21,17 @@ export default async function QuotePage({ params, searchParams }: PageProps<'/qu
   const ff = typeof query.ff === 'string' ? query.ff : undefined;
   const flags = resolveFlags(query.ff);
 
+  const carrierName = carriers.data.find((carrier) => carrier.id === carrierId)?.name ?? carrierId;
+
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{offered.label}</h1>
-        <ProfileSwitcher product={product} active={profile} ff={ff} />
-      </div>
-      <QuoteFlow
-        key={profile}
-        carrierId={carrierId}
-        customerId={profile}
-        flags={flags}
-        minDelayMs={eligibilityMinDelayMs(flags, loadingStepMinDurationMs())}
-      />
-    </div>
+    <QuoteFlow
+      key={profile}
+      carrierId={carrierId}
+      customerId={profile}
+      flags={flags}
+      minDelayMs={eligibilityMinDelayMs(flags, loadingStepMinDurationMs())}
+      title={`${offered.label} · ${carrierName}`}
+      topRight={<ProfileSwitcher product={product} active={profile} ff={ff} />}
+    />
   );
 }

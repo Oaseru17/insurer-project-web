@@ -1,12 +1,15 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist } from 'next/font/google';
-import { AppShell } from '@/components/app-shell';
+import { DM_Sans } from 'next/font/google';
 import './globals.css';
 
-const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
+const dmSans = DM_Sans({
+  variable: '--font-dm-sans',
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+});
 
 export const metadata: Metadata = {
-  title: 'Olli — Renters insurance quote',
+  title: 'Olli — Insurance made easy',
   description: 'Get a renters insurance quote using the details you already gave us.',
 };
 
@@ -17,10 +20,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="en" className={`${geistSans.variable} antialiased`}>
-      <body>
-        <AppShell>{children}</AppShell>
-      </body>
+    <html lang="en" className={`${dmSans.variable} antialiased`}>
+      <body>{children}</body>
     </html>
   );
 }
