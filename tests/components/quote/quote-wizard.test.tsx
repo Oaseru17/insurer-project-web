@@ -134,7 +134,14 @@ describe('QuoteWizard', () => {
     await screen.findByRole('heading', { name: 'About you' });
 
     fireEvent.click(screen.getByRole('button', { name: 'Change Birth date' }));
-    type(/Birth date/, '01/01/2010');
+    fireEvent.click(screen.getByRole('button', { name: /Birth date/ }));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Choose the Year' }), {
+      target: { value: '2010' },
+    });
+    fireEvent.change(screen.getByRole('combobox', { name: 'Choose the Month' }), {
+      target: { value: '0' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /January 1st, 2010/ }));
     type('Mobile number', '503-555-0142');
     next();
     await screen.findByRole('heading', { name: 'Your home' });
