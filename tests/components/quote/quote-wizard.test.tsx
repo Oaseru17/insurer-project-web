@@ -81,26 +81,47 @@ describe('QuoteWizard', () => {
     expect(screen.getByText(/"contents_coverage": 50000/)).toBeInTheDocument();
   });
 
-  it('re-checks eligibility when a step changes the birth date', async () => {
-    const checkEligibility = jest.fn<QuoteServices['checkEligibility']>(async () => ({
-      ok: true,
-      data: { status: 'ineligible', reasons: [SAM_LIKE_REASON] },
+  it('checks eligibility again only when the quote is submitted, not on every step', async () => {
+    const checkEligibility = jest.fn<QuoteServices['checkEligibility']>();
+    const createQuote = jest.fn<QuoteServices['createQuote']>(async () => ({
+      ok: false,
+      status: 422,
+      error: {
+        code: 'ineligible',
+        message: 'The carrier cannot quote this customer',
+        reasons: [SAM_LIKE_REASON],
+      },
     }));
-    const onIneligible = renderWizard(stubServices({ checkEligibility }));
+    const onIneligible = renderWizard(stubServices({ checkEligibility, createQuote }));
     await screen.findByText('Step 1 of 5');
 
     fireEvent.click(screen.getByRole('button', { name: 'Change Birth date' }));
     type(/Birth date/, '01/01/2010');
     type('Mobile number', '503-555-0142');
     next();
+    await screen.findByText('Step 2 of 5');
+    next();
+    await screen.findByText('Step 3 of 5');
+    type('Contents coverage amount (USD)', '2');
+    next();
+    await screen.findByText('Step 4 of 5');
+    next();
+    await screen.findByText('Step 5 of 5');
+    type('Number of claims in the past 5 years', '0');
+    next();
+    await screen.findByRole('heading', { name: 'Review your answers' });
+    expect(checkEligibility).not.toHaveBeenCalled();
 
-    await screen.findByText('Step 1 of 5');
-    expect(checkEligibility).toHaveBeenCalledWith(
+    fireEvent.click(screen.getByRole('button', { name: 'Get quote' }));
+
+    await screen.findByRole('heading', { name: 'Review your answers' });
+    expect(createQuote).toHaveBeenCalledWith(
       'harbor',
       expect.objectContaining({
         answers: expect.objectContaining({ date_of_birth: '01/01/2010' }),
       }),
     );
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(onIneligible).toHaveBeenCalledWith([SAM_LIKE_REASON]);
   });
 });
