@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { api, type Schemas } from '@/lib/api';
+import type { Schemas } from '@/lib/api';
 import { localIsoDate } from '@/lib/dates';
 import type { Flags } from '@/lib/flags';
 import { CheckingEligibility } from './checking-eligibility';
 import { IneligiblePanel } from './ineligible-panel';
+import { QuoteWizard } from './quote-wizard';
+import { defaultQuoteServices, type QuoteServices } from './services';
 
 type Phase =
   | { name: 'checking' }
@@ -18,7 +20,7 @@ interface QuoteFlowProps {
   customerId: string;
   flags: Flags;
   minDelayMs: number;
-  checkEligibility?: typeof api.checkEligibility;
+  services?: QuoteServices;
 }
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -28,15 +30,16 @@ function QuoteFlow({
   customerId,
   flags,
   minDelayMs,
-  checkEligibility = api.checkEligibility,
+  services = defaultQuoteServices,
 }: QuoteFlowProps) {
   const [phase, setPhase] = useState<Phase>({ name: 'checking' });
+  const [asOf] = useState(localIsoDate);
 
   useEffect(() => {
     let current = true;
     void (async () => {
       const [result] = await Promise.all([
-        checkEligibility(carrierId, { customerId, asOf: localIsoDate() }),
+        services.checkEligibility(carrierId, { customerId, asOf }),
         wait(minDelayMs),
       ]);
       if (!current) return;
@@ -48,7 +51,7 @@ function QuoteFlow({
     return () => {
       current = false;
     };
-  }, [carrierId, customerId, minDelayMs, checkEligibility]);
+  }, [carrierId, customerId, asOf, minDelayMs, services]);
 
   switch (phase.name) {
     case 'checking':
@@ -65,12 +68,13 @@ function QuoteFlow({
       );
     case 'form':
       return (
-        <section aria-labelledby="details-heading" className="space-y-2">
-          <h2 id="details-heading" className="text-xl font-semibold">
-            Your details
-          </h2>
-          <p className="text-slate-600">The questions arrive with the next ticket.</p>
-        </section>
+        <QuoteWizard
+          carrierId={carrierId}
+          customerId={customerId}
+          asOf={asOf}
+          services={services}
+          onIneligible={(reasons) => setPhase({ name: 'ineligible', reasons })}
+        />
       );
   }
 }
