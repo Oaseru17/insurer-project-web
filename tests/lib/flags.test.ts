@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { eligibilityMinDelayMs, FLAG_DEFAULTS, resolveFlags } from './flags';
+import { eligibilityMinDelayMs, FLAG_DEFAULTS, resolveFlags } from '@/lib/flags';
 
 describe('resolveFlags', () => {
   it('turns every flag on by default', () => {
