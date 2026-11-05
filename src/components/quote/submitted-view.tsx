@@ -4,12 +4,13 @@ import { useEffect, useRef } from 'react';
 import type { Schemas } from '@/lib/api';
 
 interface SubmittedViewProps {
+  carrierName: string;
   quote: Schemas['QuoteResponse'];
   showCarrierRequest: boolean;
 }
 
 // Success message, plus a small labelled box showing the payload for developers.
-function SubmittedView({ quote, showCarrierRequest }: SubmittedViewProps) {
+function SubmittedView({ carrierName, quote, showCarrierRequest }: SubmittedViewProps) {
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => heading.current?.focus(), []);
   return (
@@ -32,15 +33,15 @@ function SubmittedView({ quote, showCarrierRequest }: SubmittedViewProps) {
           </svg>
         </span>
         <div className="space-y-1">
-          <h2
+          <h1
             id="submitted-heading"
             ref={heading}
             tabIndex={-1}
             className="text-xl font-bold focus-visible:outline-none"
           >
             Quote request made
-          </h2>
-          <p>Harbor has everything it needs to quote your renters insurance.</p>
+          </h1>
+          <p>{carrierName} has everything it needs to quote you.</p>
           <p className="flex flex-wrap items-center gap-2 pt-1 text-sm">
             <span className="rounded-ui bg-white px-2 py-0.5 font-bold shadow-[inset_0_0_0_1px_var(--color-positive-border)]">
               Ref {quote.quoteId.slice(0, 8)}
@@ -52,12 +53,12 @@ function SubmittedView({ quote, showCarrierRequest }: SubmittedViewProps) {
 
       {showCarrierRequest && (
         <section aria-labelledby="dev-payload" className="animate-enter panel overflow-hidden">
-          <h3
+          <h2
             id="dev-payload"
             className="border-b border-line bg-canvas px-3 py-1.5 text-xs font-bold text-ink-muted"
           >
-            Dev only — the request Harbor will receive
-          </h3>
+            Dev only — the request {carrierName} will receive
+          </h2>
           <pre className="max-h-64 overflow-auto bg-[#1b1c1d] p-3 text-xs leading-relaxed text-white">
             {JSON.stringify(quote.request, null, 2)}
           </pre>

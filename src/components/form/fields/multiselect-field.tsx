@@ -19,6 +19,7 @@ function MultiSelectField({
   const ids = fieldIds(field.key);
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
   const chosen = Array.isArray(value) ? value : [];
   const ordered = [
     ...field.options.filter((option) => option !== EXCLUSIVE_OPTION),
@@ -47,7 +48,14 @@ function MultiSelectField({
       ref={root}
       className="relative"
       onKeyDown={(event) => {
-        if (event.key === 'Escape') setOpen(false);
+        if (event.key !== 'Escape' || !open) return;
+        setOpen(false);
+        trigger.current?.focus();
+      }}
+      onBlur={(event) => {
+        // Tabbing out closes the list; a mouse click outside is handled by the listener above.
+        const next = event.relatedTarget;
+        if (next instanceof Node && !root.current?.contains(next)) setOpen(false);
       }}
     >
       <p id={ids.label} className="field-label">
@@ -56,6 +64,7 @@ function MultiSelectField({
       </p>
       <Hint id={ids.hint} text={hint} />
       <button
+        ref={trigger}
         id={ids.input}
         type="button"
         aria-haspopup="true"

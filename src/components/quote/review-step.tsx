@@ -18,7 +18,7 @@ function ReviewStep({ sections, visible, answers, onEdit }: ReviewStepProps) {
         return (
           <section key={section.id} className="panel overflow-hidden">
             <div className="flex items-center justify-between border-b border-line bg-canvas px-4 py-2.5">
-              <h3 className="font-bold">{section.title}</h3>
+              <h2 className="font-bold">{section.title}</h2>
               <button
                 type="button"
                 onClick={() => onEdit(index)}

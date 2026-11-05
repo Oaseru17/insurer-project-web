@@ -27,6 +27,7 @@ export default async function QuotePage({ params, searchParams }: PageProps<'/qu
     <QuoteFlow
       key={customerId}
       carrierId={carrierId}
+      carrierName={carrierName}
       customerId={customerId}
       flags={flags}
       minDelayMs={eligibilityMinDelayMs(flags, loadingStepMinDurationMs())}

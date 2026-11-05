@@ -1,8 +1,8 @@
-# olli-web
+# Olli web
 
-The Next.js front end for Olli's renters quote with **Harbor Assurance**. It renders Harbor's form from the
-JSON the API serves, pre-fills what the customer's profile already answers, asks only for what's missing,
-and shows clearly why Harbor can't quote someone.
+The Next.js front end for Olli's carrier quotes; the first carrier is **Harbor Assurance** (renters). It
+renders the carrier's form from the JSON the API serves, pre-fills what the customer's profile already
+answers, asks only for what's missing, and shows clearly why a carrier can't quote someone.
 
 **The full write-up** — field mapping, eligibility, assumptions, architecture, the 50-carrier design and
 what I'd do with more time — is in the
@@ -39,9 +39,9 @@ Settings (`.env.example`):
 
 1. **What would you like to insure?** — products come from the carriers the API returns (Renters today).
 2. **Checking eligibility…** — runs before any questions. Sam Lee (sample profile B) stops here with both reasons.
-3. **One step per section** of Harbor's form (About you → Your home → Coverage → Pets → Claims history): answers
+3. **One step per section** of the carrier's form (About you → Your home → Coverage → Pets → Claims history): answers
    from the profile are shown read-only with **Change**; only missing questions are asked.
-4. **Review** → **Get quote** → **Quote request made**, with a _dev only_ box showing the exact JSON Harbor would receive.
+4. **Review** → **Get quote** → **Quote request made**, with a _dev only_ box showing the exact JSON the carrier would receive.
 
 Use the menu at the top right to **log in as** either sample customer (demo only — the cookie holds just
 the customer id).
@@ -63,11 +63,11 @@ the customer id).
 
 Override in the URL with `?ff=`, e.g. `?ff=-eligibilityLoadingStep`.
 
-| Flag                       | Default | Effect                                                         |
-| -------------------------- | ------- | -------------------------------------------------------------- |
-| `eligibilityLoadingStep`   | on      | Show the "Checking eligibility…" screen                        |
-| `showIneligibilityReasons` | on      | List every reason; off shows a generic message                 |
-| `showCarrierRequest`       | on      | Show the _dev only_ box with Harbor's request after submitting |
+| Flag                       | Default | Effect                                                              |
+| -------------------------- | ------- | ------------------------------------------------------------------- |
+| `eligibilityLoadingStep`   | on      | Show the "Checking eligibility…" screen                             |
+| `showIneligibilityReasons` | on      | List every reason; off shows a generic message                      |
+| `showCarrierRequest`       | on      | Show the _dev only_ box with the carrier's request after submitting |
 
 ## Tests
 
