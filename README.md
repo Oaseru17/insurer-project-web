@@ -51,7 +51,8 @@ the customer id).
 - **No business logic here.** Mapping, eligibility and validation live in the API; the web renders the form
   definition and field results it receives and shows the API's errors and reasons.
 - **Schema-driven form:** one component per field type, so any carrier's form renders without new code.
-  Amounts show as tiles, lists (state, breed) as dropdowns, multi-choice (pets) as a multi-select dropdown
+  Amounts show as tiles, dates as a calendar (stored in the carrier's own format, e.g. `MM/DD/YYYY`),
+  lists (state, breed) as dropdowns, multi-choice (pets) as a multi-select dropdown
   where "None" can't be combined with a pet.
 - **Typed client:** `npm run gen:api` regenerates `src/lib/api-types.ts` from the API's `/openapi.json`, so a
   changed API shows up as a type error here.
@@ -72,5 +73,5 @@ Override in the URL with `?ff=`, e.g. `?ff=-eligibilityLoadingStep`.
 ## Tests
 
 Jest + React Testing Library, in `tests/` (mirroring `src/`), written before each feature: the stepped
-quote, eligibility screens, form fields (dropdowns, "None", date formatting), product picker, customer menu
+quote, eligibility screens, form fields (dropdowns, "None", calendar date picker), product picker, customer menu
 and flags. API calls are passed in as stubs, so tests never hit the network.

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { DM_Sans } from 'next/font/google';
+import 'react-day-picker/style.css';
 import './globals.css';
 
 const dmSans = DM_Sans({

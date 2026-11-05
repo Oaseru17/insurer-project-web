@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { type Answers, type FieldDef, type FieldValue, visibleFields } from '@/lib/form/visibility';
 import { BooleanField } from './fields/boolean-field';
+import { DateField } from './fields/date-field';
 import { MultiSelectField } from './fields/multiselect-field';
 import { NumberField } from './fields/number-field';
 import { SelectField } from './fields/select-field';
@@ -28,8 +29,9 @@ function renderField(field: FieldDef, props: Omit<FormRendererProps, 'fields'>):
     case 'text':
     case 'email':
     case 'tel':
-    case 'date':
       return <TextField field={field} {...common} />;
+    case 'date':
+      return <DateField field={field} {...common} />;
     case 'number':
       return <NumberField field={field} {...common} />;
     case 'select':

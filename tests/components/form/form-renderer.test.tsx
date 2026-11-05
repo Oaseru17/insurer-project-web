@@ -47,12 +47,22 @@ describe('FormRenderer', () => {
     expect(screen.getByRole('combobox', { name: 'Dog breed' })).toBeInTheDocument();
   });
 
-  it('fills in the date separators as the customer types', () => {
-    render(<Harness />);
+  it('picks the birth date from a calendar', () => {
+    render(<Harness initial={{ date_of_birth: '03/12/1994' }} />);
+    const birthDate = screen.getByRole('button', { name: /Birth date/ });
+    expect(birthDate).toHaveTextContent('12 March 1994');
 
-    fireEvent.change(screen.getByLabelText(/Birth date/), { target: { value: '03121994' } });
+    fireEvent.click(birthDate);
+    fireEvent.change(screen.getByRole('combobox', { name: 'Choose the Year' }), {
+      target: { value: '1995' },
+    });
+    fireEvent.change(screen.getByRole('combobox', { name: 'Choose the Month' }), {
+      target: { value: '6' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /July 4th, 1995/ }));
 
-    expect(screen.getByLabelText(/Birth date/)).toHaveValue('03/12/1994');
+    expect(birthDate).toHaveTextContent('4 July 1995');
+    expect(screen.queryByRole('grid')).not.toBeInTheDocument();
   });
 
   it('does not let None sit alongside another pet', () => {
