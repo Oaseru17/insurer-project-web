@@ -114,7 +114,8 @@ function Steps({
     setStep(index);
   };
 
-  const next = async () => {
+  // Eligibility is checked before the questions and again on submit, not on every step.
+  const next = () => {
     const missing = Object.fromEntries(
       asked
         .filter((field) => field.required && !isAnswered(answers[field.key]))
@@ -122,12 +123,6 @@ function Steps({
     );
     if (Object.keys(missing).length > 0) return setErrors(missing);
 
-    setBusy(true);
-    const eligibility = await services.checkEligibility(carrierId, { customerId, asOf, answers });
-    setBusy(false);
-    if (eligibility.ok && eligibility.data.status === 'ineligible') {
-      return onIneligible(eligibility.data.reasons);
-    }
     goTo(step + 1);
   };
 
@@ -203,7 +198,7 @@ function Steps({
         <button
           type="button"
           disabled={busy}
-          onClick={() => void (isReview ? submit() : next())}
+          onClick={() => (isReview ? void submit() : next())}
           className="rounded-lg bg-blue-600 px-5 py-2 font-medium text-white disabled:opacity-60"
         >
           {isReview ? 'Get quote' : 'Next'}
