@@ -38,21 +38,28 @@ async function unwrap<T>(
 }
 
 const api = {
-  getCarriers: () => unwrap(client.GET('/api/carriers')),
+  getCarriers: () => unwrap(client.GET('/api/v1/carriers')),
   getCarrierForm: (id: string) =>
-    unwrap(client.GET('/api/carriers/{id}/form', { params: { path: { id } } })),
+    unwrap(client.GET('/api/v1/carriers/{id}/form', { params: { path: { id } } })),
   getCustomer: (id: string) =>
-    unwrap(client.GET('/api/customers/{id}', { params: { path: { id } } })),
-  prefill: (carrierId: string, body: Schemas['PrefillRequest']) =>
+    unwrap(client.GET('/api/v1/customers/{id}', { params: { path: { id } } })),
+  prefill: (carrierId: string, customerId: string) =>
     unwrap(
-      client.POST('/api/forms/{carrierId}/prefill', { params: { path: { carrierId } }, body }),
+      client.GET('/api/v1/forms/{carrierId}/prefill', {
+        params: { path: { carrierId }, query: { customerId } },
+      }),
     ),
   checkEligibility: (carrierId: string, body: Schemas['EligibilityRequest']) =>
     unwrap(
-      client.POST('/api/carriers/{id}/eligibility', { params: { path: { id: carrierId } }, body }),
+      client.POST('/api/v1/carriers/{id}/eligibility', {
+        params: { path: { id: carrierId } },
+        body,
+      }),
     ),
   createQuote: (carrierId: string, body: Schemas['QuoteCreateRequest']) =>
-    unwrap(client.POST('/api/carriers/{id}/quotes', { params: { path: { id: carrierId } }, body })),
+    unwrap(
+      client.POST('/api/v1/carriers/{id}/quotes', { params: { path: { id: carrierId } }, body }),
+    ),
 };
 
 export { type ApiError, type ApiResult, type Schemas, api };

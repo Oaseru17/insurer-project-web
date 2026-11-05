@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
-import { AppShell } from './app-shell';
+import { AppShell } from '@/components/app-shell';
 
 describe('AppShell', () => {
   it('renders page content inside the main landmark', () => {
