@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { QuoteWizard } from '@/components/quote/quote-wizard';
 import type { QuoteServices } from '@/components/quote/services';
 import type { Schemas } from '@/lib/api';
@@ -29,6 +29,7 @@ function renderWizard(
   render(
     <QuoteWizard
       carrierId="harbor"
+      carrierName="Harbor Assurance"
       customerId="a"
       asOf="2026-11-05"
       services={services}
@@ -160,5 +161,50 @@ describe('QuoteWizard', () => {
     );
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(onIneligible).toHaveBeenCalledWith([SAM_LIKE_REASON]);
+  });
+
+  it('puts the cursor in a profile answer the customer chooses to change', async () => {
+    renderWizard(stubServices());
+    await screen.findByRole('heading', { level: 1, name: 'About you' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Change Birth date' }));
+
+    expect(screen.getByLabelText(/Birth date/)).toHaveFocus();
+  });
+
+  it('on a 400, returns to the step with the problem and focuses the error summary', async () => {
+    const createQuote = jest
+      .fn<QuoteServices['createQuote']>()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        error: {
+          code: 'invalid_request',
+          message: 'Some answers are not valid',
+          issues: [{ path: 'phone', message: 'Mobile number is not valid' }],
+        },
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        error: { code: 'invalid_request', message: 'Something went wrong' },
+      });
+    renderWizard(stubServices({ createQuote }));
+    await walkToReview();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Get quote' }));
+    expect(await screen.findByRole('heading', { level: 1, name: 'About you' })).toBeInTheDocument();
+    const summary = screen.getByRole('alert');
+    expect(summary).toHaveFocus();
+    expect(
+      within(summary).getByRole('link', { name: 'Mobile number is not valid' }),
+    ).toHaveAttribute('href', '#field-phone');
+
+    for (let step = 0; step < 5; step++) next();
+    await screen.findByRole('heading', { name: 'Review your answers' });
+    fireEvent.click(screen.getByRole('button', { name: 'Get quote' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Something went wrong');
+    expect(screen.getByRole('alert')).toHaveFocus();
+    expect(within(screen.getByRole('alert')).queryByRole('link')).not.toBeInTheDocument();
   });
 });

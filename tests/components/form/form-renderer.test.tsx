@@ -66,4 +66,29 @@ describe('FormRenderer', () => {
     fireEvent.click(screen.getByRole('checkbox', { name: 'Cat' }));
     expect(screen.getByRole('checkbox', { name: 'None' })).not.toBeChecked();
   });
+
+  it('closes the pets list on Escape or tabbing away, returning focus on Escape', () => {
+    render(<Harness />);
+    const trigger = screen.getByRole('button', { name: /Pets in the home/ });
+
+    fireEvent.click(trigger);
+    fireEvent.keyDown(screen.getByRole('checkbox', { name: 'Dog' }), { key: 'Escape' });
+    expect(screen.queryByRole('checkbox', { name: 'Dog' })).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+
+    fireEvent.click(trigger);
+    fireEvent.blur(screen.getByRole('checkbox', { name: 'Dog' }), {
+      relatedTarget: screen.getByLabelText('Number of claims in the past 5 years'),
+    });
+    expect(screen.queryByRole('checkbox', { name: 'Dog' })).not.toBeInTheDocument();
+  });
+
+  it('lets an optional yes/no answer be cleared', () => {
+    render(<Harness initial={{ building_has_sprinklers: true }} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Clear.*sprinklers/ }));
+
+    const sprinklers = screen.getByRole('radiogroup', { name: /sprinklers/ });
+    expect(within(sprinklers).getByRole('radio', { name: 'Yes' })).not.toBeChecked();
+  });
 });
