@@ -1,0 +1,41 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply font-sans;
+  }
+
+  img,
+  svg,
+  video {
+    @apply block max-w-full;
+  }
+
+  /* 16px minimum stops iOS Safari zooming into inputs on focus. */
+  input,
+  select,
+  textarea,
+  button {
+    font-size: max(1rem, 1em);
+  }
+
+  /* WCAG 2.5.8 target size, with headroom for touch. */
+  button,
+  [role='button'],
+  input:not([type='checkbox'], [type='radio']),
+  select {
+    min-height: 2.75rem;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-blue-600;
+  }
+}
