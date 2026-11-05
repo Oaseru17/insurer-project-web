@@ -12,9 +12,9 @@ function ProfileAnswers({ fields, answers, onChange }: ProfileAnswersProps) {
   if (fields.length === 0) return null;
   return (
     <section aria-labelledby="from-profile" className="panel px-4 pt-3 pb-1">
-      <h3 id="from-profile" className="text-xs font-bold tracking-wide text-ink-muted uppercase">
+      <h2 id="from-profile" className="text-xs font-bold tracking-wide text-ink-muted uppercase">
         From your profile
-      </h3>
+      </h2>
       <dl className="divide-y divide-line">
         {fields.map((field) => (
           <div key={field.key} className="flex flex-wrap items-center gap-x-4 gap-y-0.5 py-2.5">

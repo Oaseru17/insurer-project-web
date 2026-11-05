@@ -1,12 +1,13 @@
 'use client';
 
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { fieldIds } from '@/components/form/field-shell';
 import { FormRenderer } from '@/components/form/form-renderer';
 import type { Schemas } from '@/lib/api';
 import { isAnswered } from '@/lib/form/display';
 import { type Answers, setAnswer, visibleFields } from '@/lib/form/visibility';
 import { ArrowIcon } from '../ui/icons';
-import { ErrorSummary } from './error-summary';
+import { ErrorSummary, FORM_ERROR } from './error-summary';
 import { GreyFrame } from './grey-frame';
 import { ProfileAnswers } from './profile-answers';
 import { ReviewStep } from './review-step';
@@ -15,6 +16,7 @@ import { SubmittedView } from './submitted-view';
 
 interface QuoteWizardProps {
   carrierId: string;
+  carrierName: string;
   customerId: string;
   asOf: string;
   services: QuoteServices;
@@ -99,6 +101,7 @@ function initialAnswers(prefill: Schemas['PrefillResponse']): Answers {
 
 function Steps({
   carrierId,
+  carrierName,
   customerId,
   asOf,
   services,
@@ -116,6 +119,7 @@ function Steps({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [quote, setQuote] = useState<Schemas['QuoteResponse'] | null>(null);
+  const [focusKey, setFocusKey] = useState<string | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
 
   const resolutions = useMemo(
@@ -143,7 +147,17 @@ function Steps({
   );
   const asked = stepFields.filter((field) => !fromProfile.includes(field));
 
-  useEffect(() => heading.current?.focus(), [step]);
+  // A new step focuses its heading, unless the error summary needs focus instead.
+  useEffect(() => {
+    if (Object.keys(errors).length === 0) heading.current?.focus();
+  }, [step, errors]);
+
+  // After Change, the answer becomes an input; put the cursor in it.
+  useEffect(() => {
+    if (!focusKey) return;
+    const target = document.getElementById(fieldIds(focusKey).input);
+    (target instanceof HTMLFieldSetElement ? target.querySelector('input') : target)?.focus();
+  }, [focusKey]);
 
   const goTo = (index: number) => {
     setErrors({});
@@ -177,7 +191,7 @@ function Steps({
       setStep(firstStep);
       setEditing((current) => new Set([...current, ...Object.keys(issues)]));
       setErrors(issues);
-    } else setErrors({ form: result.error.message });
+    } else setErrors({ [FORM_ERROR]: result.error.message });
   };
 
   const stepCount = sections.length + 1;
@@ -191,17 +205,21 @@ function Steps({
       right={topRight}
     >
       {quote ? (
-        <SubmittedView quote={quote} showCarrierRequest={showCarrierRequest} />
+        <SubmittedView
+          carrierName={carrierName}
+          quote={quote}
+          showCarrierRequest={showCarrierRequest}
+        />
       ) : (
         <div key={step} className="animate-enter space-y-6">
           <div className="space-y-1">
-            <h2
+            <h1
               ref={heading}
               tabIndex={-1}
               className="text-2xl font-bold tracking-[-0.02em] focus-visible:outline-none"
             >
               {isReview ? 'Review your answers' : section?.title}
-            </h2>
+            </h1>
             <p className="text-[15px] text-ink-muted">
               {isReview
                 ? 'Check everything, then get your quote.'
@@ -216,7 +234,10 @@ function Steps({
               <ProfileAnswers
                 fields={fromProfile}
                 answers={answers}
-                onChange={(key) => setEditing((current) => new Set([...current, key]))}
+                onChange={(key) => {
+                  setEditing((current) => new Set([...current, key]));
+                  setFocusKey(key);
+                }}
               />
               <FormRenderer
                 fields={asked}

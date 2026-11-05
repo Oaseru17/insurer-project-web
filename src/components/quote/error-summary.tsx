@@ -2,6 +2,9 @@
 
 import { useEffect, useRef } from 'react';
 
+// Errors not tied to a field (e.g. a failed request) are shown as text, not a link.
+const FORM_ERROR = 'form';
+
 function ErrorSummary({ errors }: { errors: Readonly<Record<string, string>> }) {
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => box.current?.focus(), [errors]);
@@ -18,9 +21,13 @@ function ErrorSummary({ errors }: { errors: Readonly<Record<string, string>> }) 
       <ul className="mt-1 list-disc pl-5">
         {entries.map(([key, message]) => (
           <li key={key}>
-            <a href={`#field-${key}`} className="underline underline-offset-2">
-              {message}
-            </a>
+            {key === FORM_ERROR ? (
+              message
+            ) : (
+              <a href={`#field-${key}`} className="underline underline-offset-2">
+                {message}
+              </a>
+            )}
           </li>
         ))}
       </ul>
@@ -28,4 +35,4 @@ function ErrorSummary({ errors }: { errors: Readonly<Record<string, string>> }) 
   );
 }
 
-export { ErrorSummary };
+export { ErrorSummary, FORM_ERROR };

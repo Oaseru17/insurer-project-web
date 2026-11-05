@@ -19,6 +19,7 @@ type Phase =
 
 interface QuoteFlowProps {
   carrierId: string;
+  carrierName: string;
   customerId: string;
   flags: Flags;
   minDelayMs: number;
@@ -31,6 +32,7 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function QuoteFlow({
   carrierId,
+  carrierName,
   customerId,
   flags,
   minDelayMs,
@@ -67,10 +69,16 @@ function QuoteFlow({
 
   switch (phase.name) {
     case 'checking':
-      return flags.eligibilityLoadingStep ? frame(<CheckingEligibility />) : null;
+      return flags.eligibilityLoadingStep
+        ? frame(<CheckingEligibility carrierName={carrierName} />)
+        : null;
     case 'ineligible':
       return frame(
-        <IneligiblePanel reasons={phase.reasons} showReasons={flags.showIneligibilityReasons} />,
+        <IneligiblePanel
+          carrierName={carrierName}
+          reasons={phase.reasons}
+          showReasons={flags.showIneligibilityReasons}
+        />,
       );
     case 'error':
       return frame(
@@ -82,6 +90,7 @@ function QuoteFlow({
       return (
         <QuoteWizard
           carrierId={carrierId}
+          carrierName={carrierName}
           customerId={customerId}
           asOf={asOf}
           services={services}

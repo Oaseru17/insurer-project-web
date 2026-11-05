@@ -13,10 +13,19 @@ interface ChoiceCardsProps {
   choices: readonly Choice[];
   hint?: string | undefined;
   error?: string | undefined;
+  onClear?: (() => void) | undefined;
 }
 
 // Option tiles backed by real radios, so keyboard and screen readers work.
-function ChoiceCards({ fieldKey, label, required, choices, hint, error }: ChoiceCardsProps) {
+function ChoiceCards({
+  fieldKey,
+  label,
+  required,
+  choices,
+  hint,
+  error,
+  onClear,
+}: ChoiceCardsProps) {
   const ids = fieldIds(fieldKey);
   return (
     <fieldset
@@ -53,6 +62,16 @@ function ChoiceCards({ fieldKey, label, required, choices, hint, error }: Choice
           </label>
         ))}
       </div>
+      {onClear && (
+        <button
+          type="button"
+          onClick={onClear}
+          aria-label={`Clear ${label}`}
+          className="mt-2 rounded-ui px-1 text-sm font-bold text-primary hover:underline"
+        >
+          Clear answer
+        </button>
+      )}
       <ErrorText id={ids.error} text={error} />
     </fieldset>
   );

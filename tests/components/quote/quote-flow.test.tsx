@@ -31,6 +31,7 @@ function renderFlow(checkEligibility: CheckEligibility, flags: Flags = FLAG_DEFA
   render(
     <QuoteFlow
       carrierId="harbor"
+      carrierName="Acme Mutual"
       customerId="b"
       flags={flags}
       minDelayMs={0}
@@ -49,10 +50,12 @@ function renderFlow(checkEligibility: CheckEligibility, flags: Flags = FLAG_DEFA
 }
 
 describe('QuoteFlow', () => {
-  it('shows every reason Harbor cannot quote, and no way to submit', async () => {
+  it('shows every reason the carrier cannot quote, and no way to submit', async () => {
     renderFlow(answer({ ok: true, data: { status: 'ineligible', reasons: SAM_REASONS } }));
 
-    expect(await screen.findByRole('heading', { name: /can’t quote you/i })).toHaveFocus();
+    const heading = await screen.findByRole('heading', { level: 1, name: /can’t quote you/i });
+    expect(heading).toHaveFocus();
+    expect(heading).toHaveTextContent('Acme Mutual can’t quote you');
     for (const reason of SAM_REASONS) expect(screen.getByText(reason.message)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /submit|get quote/i })).not.toBeInTheDocument();
   });
