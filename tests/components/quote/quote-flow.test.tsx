@@ -1,10 +1,13 @@
 import { describe, expect, it } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { QuoteFlow } from '@/components/quote/quote-flow';
-import type { api } from '@/lib/api';
+import type { QuoteServices } from '@/components/quote/services';
+import type { Schemas } from '@/lib/api';
 import { FLAG_DEFAULTS, type Flags } from '@/lib/flags';
+import harborForm from '../../fixtures/harbor-form.json';
+import mayaPrefill from '../../fixtures/maya-prefill.json';
 
-type CheckEligibility = typeof api.checkEligibility;
+type CheckEligibility = QuoteServices['checkEligibility'];
 
 const SAM_REASONS = [
   {
@@ -31,7 +34,16 @@ function renderFlow(checkEligibility: CheckEligibility, flags: Flags = FLAG_DEFA
       customerId="b"
       flags={flags}
       minDelayMs={0}
-      checkEligibility={checkEligibility}
+      services={{
+        checkEligibility,
+        prefill: async () => ({ ok: true, data: mayaPrefill as Schemas['PrefillResponse'] }),
+        getCarrierForm: async () => ({ ok: true, data: harborForm as Schemas['FormDefinition'] }),
+        createQuote: async () => ({
+          ok: false,
+          status: 500,
+          error: { code: 'internal_error', message: 'unused' },
+        }),
+      }}
     />,
   );
 }
@@ -48,7 +60,7 @@ describe('QuoteFlow', () => {
   it('moves an eligible customer on to the questions', async () => {
     renderFlow(answer({ ok: true, data: { status: 'eligible' } }));
 
-    expect(await screen.findByRole('heading', { name: /your details/i })).toBeInTheDocument();
+    expect(await screen.findByText('Step 1 of 5')).toBeInTheDocument();
   });
 
   it('shows the eligibility check only when its flag is on', async () => {
@@ -56,7 +68,7 @@ describe('QuoteFlow', () => {
 
     renderFlow(eligible);
     expect(screen.getByRole('status')).toHaveTextContent('Checking eligibility');
-    await screen.findByRole('heading', { name: /your details/i });
+    await screen.findByText('Step 1 of 5');
 
     renderFlow(eligible, { ...FLAG_DEFAULTS, eligibilityLoadingStep: false });
     expect(screen.queryAllByRole('status')).toHaveLength(0);

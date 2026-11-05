@@ -1,0 +1,97 @@
+{
+  "carrierId": "harbor",
+  "customerId": "a",
+  "resolutions": [
+    {
+      "key": "applicant_full_name",
+      "source": "converted",
+      "value": "Maya Torres",
+      "reason": "first_name + last_name; editable, as a legal name may differ"
+    },
+    {
+      "key": "date_of_birth",
+      "source": "converted",
+      "value": "03/12/1994",
+      "reason": "date_of_birth in Harbor's MM/DD/YYYY format"
+    },
+    {
+      "key": "contact_email",
+      "source": "profile",
+      "value": "maya@example.com",
+      "reason": "email, copied"
+    },
+    {
+      "key": "phone",
+      "source": "ask",
+      "reason": "The profile has no phone number"
+    },
+    {
+      "key": "residence_state",
+      "source": "converted",
+      "value": "Oregon",
+      "reason": "state code OR → Oregon"
+    },
+    {
+      "key": "postal_code",
+      "source": "profile",
+      "value": "97205",
+      "reason": "zip, copied"
+    },
+    {
+      "key": "contents_coverage",
+      "source": "ask",
+      "reason": "Property value isn't coverage: the customer picks one of Harbor's amounts",
+      "hint": "Your belongings are worth about $32,000"
+    },
+    {
+      "key": "pets",
+      "source": "suggested",
+      "value": ["Dog"],
+      "reason": "has_dog shows a dog, not that it is the only pet"
+    },
+    {
+      "key": "dog_breed",
+      "source": "profile",
+      "value": "Labrador",
+      "reason": "dog_breed matches Harbor's option"
+    },
+    {
+      "key": "claims_last_5_years",
+      "source": "ask",
+      "reason": "A 3-year claim count can't answer a 5-year question",
+      "hint": "Your profile shows 0 claim(s) in the last 3 years"
+    },
+    {
+      "key": "building_has_sprinklers",
+      "source": "ask",
+      "reason": "The profile says nothing about sprinklers"
+    }
+  ],
+  "sections": [
+    {
+      "id": "about_you",
+      "title": "About you",
+      "fields": ["applicant_full_name", "date_of_birth", "contact_email", "phone"]
+    },
+    {
+      "id": "your_home",
+      "title": "Your home",
+      "fields": ["residence_state", "postal_code", "building_has_sprinklers"]
+    },
+    {
+      "id": "coverage",
+      "title": "Coverage",
+      "fields": ["contents_coverage"]
+    },
+    {
+      "id": "pets",
+      "title": "Pets",
+      "fields": ["pets", "dog_breed"]
+    },
+    {
+      "id": "claims_history",
+      "title": "Claims history",
+      "fields": ["claims_last_5_years"]
+    }
+  ]
+}
