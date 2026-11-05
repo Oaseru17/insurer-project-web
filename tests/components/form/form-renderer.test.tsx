@@ -26,24 +26,38 @@ describe('FormRenderer', () => {
     expect(screen.getByLabelText('Full legal name')).toBeInTheDocument();
     expect(screen.getByLabelText(/Birth date/)).toBeInTheDocument();
     expect(screen.getByLabelText('Mobile number')).toHaveAttribute('type', 'tel');
-    expect(screen.getByRole('combobox', { name: 'Contents coverage amount (USD)' })).toHaveValue(
-      '',
-    );
-    const sprinklers = screen.getByRole('group', { name: /sprinklers/ });
+    const coverage = screen.getByRole('radiogroup', { name: 'Contents coverage amount (USD)' });
+    expect(
+      within(coverage)
+        .getAllByRole('radio')
+        .filter((radio) => (radio as HTMLInputElement).checked),
+    ).toHaveLength(0);
+    expect(within(coverage).getByRole('radio', { name: '$50,000' })).toBeInTheDocument();
+    const sprinklers = screen.getByRole('radiogroup', { name: /sprinklers/ });
     expect(
       within(sprinklers)
         .getAllByRole('radio')
         .filter((radio) => (radio as HTMLInputElement).checked),
     ).toHaveLength(0);
-    expect(screen.queryByLabelText('Dog breed')).not.toBeInTheDocument();
+    expect(screen.queryByRole('combobox', { name: 'Dog breed' })).not.toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole('button', { name: /Pets in the home/ }));
     fireEvent.click(screen.getByRole('checkbox', { name: 'Dog' }));
 
-    expect(screen.getByLabelText('Dog breed')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Dog breed' })).toBeInTheDocument();
+  });
+
+  it('fills in the date separators as the customer types', () => {
+    render(<Harness />);
+
+    fireEvent.change(screen.getByLabelText(/Birth date/), { target: { value: '03121994' } });
+
+    expect(screen.getByLabelText(/Birth date/)).toHaveValue('03/12/1994');
   });
 
   it('does not let None sit alongside another pet', () => {
     render(<Harness initial={{ pets: ['Dog'] }} />);
+    fireEvent.click(screen.getByRole('button', { name: /Pets in the home/ }));
 
     fireEvent.click(screen.getByRole('checkbox', { name: 'None' }));
     expect(screen.getByRole('checkbox', { name: 'Dog' })).not.toBeChecked();

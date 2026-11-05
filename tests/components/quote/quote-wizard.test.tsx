@@ -21,7 +21,11 @@ function stubServices(overrides: Partial<QuoteServices> = {}): QuoteServices {
   };
 }
 
-function renderWizard(services: QuoteServices, onIneligible = jest.fn()) {
+function renderWizard(
+  services: QuoteServices,
+  onIneligible = jest.fn(),
+  showCarrierRequest = true,
+) {
   render(
     <QuoteWizard
       carrierId="harbor"
@@ -29,12 +33,13 @@ function renderWizard(services: QuoteServices, onIneligible = jest.fn()) {
       asOf="2026-11-05"
       services={services}
       onIneligible={onIneligible}
+      showCarrierRequest={showCarrierRequest}
     />,
   );
   return onIneligible;
 }
 
-const next = () => fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+const next = () => fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
 const type = (label: string | RegExp, value: string) =>
   fireEvent.change(screen.getByLabelText(label), { target: { value } });
 
@@ -42,43 +47,75 @@ describe('QuoteWizard', () => {
   it('shows step 1 with what the profile answers, and asks only what is missing', async () => {
     renderWizard(stubServices());
 
-    expect(await screen.findByText('Step 1 of 5')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'About you' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'About you' })).toBeInTheDocument();
     expect(screen.getByText('Maya Torres')).toBeInTheDocument();
     expect(screen.queryByLabelText('Full legal name')).not.toBeInTheDocument();
 
     next();
     expect(screen.getByRole('alert')).toHaveTextContent('Mobile number is required');
-    expect(screen.getByText('Step 1 of 5')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'About you' })).toBeInTheDocument();
 
     type('Mobile number', '503-555-0142');
     next();
-    expect(await screen.findByText('Step 2 of 5')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Your home' })).toBeInTheDocument();
   });
 
-  it('walks the steps to review and shows the request Harbor would receive', async () => {
-    renderWizard(stubServices());
-    await screen.findByText('Step 1 of 5');
-
+  async function walkToReview() {
+    await screen.findByRole('heading', { name: 'About you' });
     type('Mobile number', '503-555-0142');
     next();
-    await screen.findByText('Step 2 of 5');
+    await screen.findByRole('heading', { name: 'Your home' });
     next();
-    await screen.findByText('Step 3 of 5');
-    type('Contents coverage amount (USD)', '2');
+    await screen.findByRole('heading', { name: 'Coverage' });
+    fireEvent.click(screen.getByRole('radio', { name: '$50,000' }));
     next();
-    await screen.findByText('Step 4 of 5');
+    await screen.findByRole('heading', { name: 'Pets' });
+    fireEvent.click(screen.getByRole('button', { name: /Pets in the home/ }));
     expect(screen.getByRole('checkbox', { name: 'Dog' })).toBeChecked();
     next();
-    await screen.findByText('Step 5 of 5');
+    await screen.findByRole('heading', { name: 'Claims history' });
     type('Number of claims in the past 5 years', '0');
     next();
+    await screen.findByRole('heading', { name: 'Review your answers' });
+  }
 
-    expect(await screen.findByRole('heading', { name: 'Review your answers' })).toBeInTheDocument();
+  it('shows a loading state, then confirms the quote request with the dev-only payload', async () => {
+    let resolveQuote: (value: Awaited<ReturnType<QuoteServices['createQuote']>>) => void = () => {};
+    const createQuote = jest.fn<QuoteServices['createQuote']>(
+      (carrierId, body) =>
+        new Promise((resolve) => {
+          resolveQuote = () =>
+            resolve({
+              ok: true,
+              data: { quoteId: 'q-1', carrierId, request: body.answers, sent: false },
+            });
+        }),
+    );
+    renderWizard(stubServices({ createQuote }));
+    await walkToReview();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Get quote' }));
+    const busy = await screen.findByRole('button', { name: /Getting your quote/ });
+    expect(busy).toBeDisabled();
+
+    resolveQuote({
+      ok: true,
+      data: { quoteId: 'q-1', carrierId: 'harbor', request: {}, sent: false },
+    });
+    expect(await screen.findByRole('heading', { name: 'Quote request made' })).toBeInTheDocument();
+    expect(screen.getByText(/Dev only/)).toBeInTheDocument();
+    expect(screen.getByText(/"contents_coverage": 50000/)).toBeInTheDocument();
+  });
+
+  it('hides the dev-only payload when its flag is off', async () => {
+    renderWizard(stubServices(), jest.fn(), false);
+    await walkToReview();
+
     fireEvent.click(screen.getByRole('button', { name: 'Get quote' }));
 
-    expect(await screen.findByText(/not sent/i)).toBeInTheDocument();
-    expect(screen.getByText(/"contents_coverage": 50000/)).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Quote request made' })).toBeInTheDocument();
+    expect(screen.queryByText(/Dev only/)).not.toBeInTheDocument();
   });
 
   it('checks eligibility again only when the quote is submitted, not on every step', async () => {
@@ -93,20 +130,20 @@ describe('QuoteWizard', () => {
       },
     }));
     const onIneligible = renderWizard(stubServices({ checkEligibility, createQuote }));
-    await screen.findByText('Step 1 of 5');
+    await screen.findByRole('heading', { name: 'About you' });
 
     fireEvent.click(screen.getByRole('button', { name: 'Change Birth date' }));
     type(/Birth date/, '01/01/2010');
     type('Mobile number', '503-555-0142');
     next();
-    await screen.findByText('Step 2 of 5');
+    await screen.findByRole('heading', { name: 'Your home' });
     next();
-    await screen.findByText('Step 3 of 5');
-    type('Contents coverage amount (USD)', '2');
+    await screen.findByRole('heading', { name: 'Coverage' });
+    fireEvent.click(screen.getByRole('radio', { name: '$50,000' }));
     next();
-    await screen.findByText('Step 4 of 5');
+    await screen.findByRole('heading', { name: 'Pets' });
     next();
-    await screen.findByText('Step 5 of 5');
+    await screen.findByRole('heading', { name: 'Claims history' });
     type('Number of claims in the past 5 years', '0');
     next();
     await screen.findByRole('heading', { name: 'Review your answers' });
