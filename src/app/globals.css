@@ -1,7 +1,72 @@
 @import 'tailwindcss';
 
+/* Olli brand (olli.insure --olli-* tokens) in a Grey-style onboarding layout (app.grey.co/auth/register). */
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-dm-sans), sans-serif;
+  --color-ink: #050505;
+  --color-ink-muted: #757372;
+  --color-ink-faint: #a8a5a2;
+  --color-line: #e3e3e8;
+  --color-line-strong: #cfcfd6;
+  --color-canvas: #f4f4f6;
+  --color-soft: #fbf3fb;
+  --color-primary: #cc33cc;
+  --color-primary-hover: #aa36aa;
+  --color-primary-text: #8f1f8f;
+  --color-accent: #fecc33;
+  --color-positive: #33cc66;
+  --color-positive-bg: #f2fbf4;
+  --color-positive-text: #1f6b32;
+  --color-positive-border: #b7e2c2;
+  --color-negative: #e5484d;
+  --color-negative-bg: #fff4f4;
+  --color-negative-text: #a8282d;
+  --color-negative-border: #f2c4c5;
+  --color-info-bg: #fbf3fb;
+  --color-info-text: #8f1f8f;
+  --color-info-border: #edc7ed;
+  --radius-ui: 8px;
+  --animate-enter: enter 280ms ease-out both;
+  --animate-pop: pop 360ms cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-draw: draw 480ms 160ms ease-out both;
+
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: -1200px 0;
+    }
+    to {
+      background-position: 1200px 0;
+    }
+  }
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 24;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
 }
 
 @layer base {
@@ -10,7 +75,17 @@
   }
 
   body {
-    @apply font-sans;
+    @apply bg-canvas font-sans text-ink-muted;
+    font-size: 16px;
+    line-height: 26px;
+    min-height: 100dvh;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply text-ink;
+    letter-spacing: -0.02em;
   }
 
   img,
@@ -27,15 +102,69 @@
     font-size: max(1rem, 1em);
   }
 
-  /* WCAG 2.5.8 target size, with headroom for touch. */
-  button,
-  [role='button'],
-  input:not([type='checkbox'], [type='radio']),
-  select {
-    min-height: 2.75rem;
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
   }
 
-  :focus-visible {
-    @apply outline-2 outline-offset-2 outline-blue-600;
+  /* Headings receive focus from code (step changes) for screen readers; no visible ring. */
+  [tabindex='-1']:focus {
+    outline: none;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 1ms !important;
+    }
+  }
+}
+
+@utility field-label {
+  @apply mb-1.5 block text-sm font-normal text-ink;
+}
+
+@utility input {
+  @apply block h-[50px] w-full rounded-ui border border-line bg-white px-3.5 text-[15px] text-ink transition outline-none placeholder:text-[#9b9ba6] hover:border-line-strong focus:border-primary focus:shadow-[0_0_0_3px_rgb(204_51_204/0.14)] aria-invalid:border-negative;
+}
+
+/* Native select styled as an input, with a chevron. */
+@utility select {
+  @apply input appearance-none bg-[url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23050505'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='m6%209%206%206%206-6'/%3E%3C/svg%3E")] bg-[length:18px] bg-[position:right_14px_center] bg-no-repeat pr-10;
+}
+
+/* Olli magenta button; a darker circle grows to fill it on hover. */
+@utility button-primary {
+  @apply relative z-0 inline-flex min-h-[50px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-ui bg-primary px-8 font-bold text-white shadow-[0_1px_2px_rgb(16_24_40/0.08)] transition-colors duration-500 select-none before:absolute before:top-1/2 before:left-1/2 before:-z-10 before:aspect-square before:w-[130%] before:-translate-x-1/2 before:-translate-y-1/2 before:scale-0 before:rounded-full before:bg-ink before:transition-transform before:duration-500 before:ease-[cubic-bezier(0.1,0,0.3,1)] before:content-[''] hover:before:scale-100 disabled:cursor-default disabled:opacity-60 disabled:before:scale-0;
+}
+
+@utility button-basic {
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-ui border border-line bg-white px-4 font-medium text-ink transition hover:border-line-strong;
+}
+
+@utility message {
+  @apply flex gap-4 rounded-ui p-5;
+}
+@utility message-info {
+  @apply message bg-info-bg text-info-text ring-1 ring-info-border;
+}
+@utility message-negative {
+  @apply message bg-negative-bg text-negative-text ring-1 ring-negative-border;
+}
+@utility message-positive {
+  @apply message bg-positive-bg text-positive-text ring-1 ring-positive-border;
+}
+
+@utility panel {
+  @apply rounded-ui border border-line bg-white;
+}
+
+@utility placeholder-line {
+  @apply h-3 animate-shimmer rounded-full bg-[linear-gradient(to_right,#eef1f5_8%,#e2e7ee_18%,#eef1f5_33%)] bg-[length:1200px_100%];
+}
+
+@utility loader {
+  @apply inline-block size-[1.2em] animate-spin rounded-full border-[0.2em] border-current/25 border-t-current;
 }

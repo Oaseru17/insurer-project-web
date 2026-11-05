@@ -20,7 +20,10 @@ interface ProfileSwitcherProps {
 // Demo control: the brief's two sample customers stand in for a signed-in customer.
 function ProfileSwitcher({ product, active, ff }: ProfileSwitcherProps) {
   return (
-    <nav aria-label="Sample customer" className="flex flex-wrap gap-2 text-sm">
+    <nav
+      aria-label="Sample customer"
+      className="inline-flex overflow-hidden rounded-ui border border-line bg-white text-sm"
+    >
       {PROFILES.map((profile) => {
         const query = new URLSearchParams({ profile: profile.id, ...(ff ? { ff } : {}) });
         const isActive = profile.id === active;
@@ -29,10 +32,8 @@ function ProfileSwitcher({ product, active, ff }: ProfileSwitcherProps) {
             key={profile.id}
             href={`/quote/${product}?${query}`}
             aria-current={isActive ? 'page' : undefined}
-            className={`rounded-full border px-3 py-1.5 ${
-              isActive
-                ? 'border-blue-600 bg-blue-600 text-white'
-                : 'border-slate-300 bg-white text-slate-700 hover:border-blue-500'
+            className={`rounded-[8px] px-4 py-2 font-bold transition-colors ${
+              isActive ? 'bg-primary text-white' : 'text-ink-muted hover:bg-canvas hover:text-ink'
             }`}
           >
             {profile.label}

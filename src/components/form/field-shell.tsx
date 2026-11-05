@@ -2,12 +2,18 @@ import type { ReactNode } from 'react';
 
 interface FieldIds {
   input: string;
+  label: string;
   hint: string;
   error: string;
 }
 
 function fieldIds(key: string): FieldIds {
-  return { input: `field-${key}`, hint: `field-${key}-hint`, error: `field-${key}-error` };
+  return {
+    input: `field-${key}`,
+    label: `field-${key}-label`,
+    hint: `field-${key}-hint`,
+    error: `field-${key}-error`,
+  };
 }
 
 function describedBy(ids: FieldIds, hint?: string, error?: string): string | undefined {
@@ -16,7 +22,7 @@ function describedBy(ids: FieldIds, hint?: string, error?: string): string | und
 
 function Hint({ id, text }: { id: string; text?: string | undefined }) {
   return text ? (
-    <p id={id} className="text-sm text-slate-600">
+    <p id={id} className="mb-1.5 text-[13px] text-ink-muted">
       {text}
     </p>
   ) : null;
@@ -24,28 +30,51 @@ function Hint({ id, text }: { id: string; text?: string | undefined }) {
 
 function ErrorText({ id, text }: { id: string; text?: string | undefined }) {
   return text ? (
-    <p id={id} className="text-sm font-medium text-red-700">
+    <p id={id} className="mt-1.5 animate-enter text-[13px] font-medium text-negative-text">
       <span className="sr-only">Error: </span>
       {text}
     </p>
   ) : null;
 }
 
+function Optional({ show }: { show: boolean }) {
+  return show ? <span className="text-ink-faint"> (optional)</span> : null;
+}
+
 function Label({
   htmlFor,
+  id,
   children,
-  optional,
+  required,
 }: {
   htmlFor: string;
+  id?: string;
   children: ReactNode;
-  optional: boolean;
+  required: boolean;
 }) {
   return (
-    <label htmlFor={htmlFor} className="block font-medium text-slate-900">
+    <label htmlFor={htmlFor} id={id} className="field-label">
       {children}
-      {optional && <span className="font-normal text-slate-500"> (optional)</span>}
+      <Optional show={!required} />
     </label>
   );
 }
 
-export { type FieldIds, fieldIds, describedBy, Hint, ErrorText, Label };
+function Legend({
+  id,
+  children,
+  required,
+}: {
+  id?: string;
+  children: ReactNode;
+  required: boolean;
+}) {
+  return (
+    <legend id={id} className="field-label">
+      {children}
+      <Optional show={!required} />
+    </legend>
+  );
+}
+
+export { type FieldIds, fieldIds, describedBy, Hint, ErrorText, Label, Legend };

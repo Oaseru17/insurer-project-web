@@ -60,7 +60,7 @@ describe('QuoteFlow', () => {
   it('moves an eligible customer on to the questions', async () => {
     renderFlow(answer({ ok: true, data: { status: 'eligible' } }));
 
-    expect(await screen.findByText('Step 1 of 5')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'About you' })).toBeInTheDocument();
   });
 
   it('shows the eligibility check only when its flag is on', async () => {
@@ -68,7 +68,7 @@ describe('QuoteFlow', () => {
 
     renderFlow(eligible);
     expect(screen.getByRole('status')).toHaveTextContent('Checking eligibility');
-    await screen.findByText('Step 1 of 5');
+    await screen.findByRole('heading', { name: 'About you' });
 
     renderFlow(eligible, { ...FLAG_DEFAULTS, eligibilityLoadingStep: false });
     expect(screen.queryAllByRole('status')).toHaveLength(0);

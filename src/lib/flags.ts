@@ -1,7 +1,7 @@
 const FLAG_DEFAULTS = {
   eligibilityLoadingStep: true,
   showIneligibilityReasons: true,
-  showMappingTrace: true,
+  showCarrierRequest: true,
 } as const;
 
 type FlagName = keyof typeof FLAG_DEFAULTS;
@@ -11,7 +11,7 @@ function isFlagName(name: string): name is FlagName {
   return Object.hasOwn(FLAG_DEFAULTS, name);
 }
 
-// `?ff=-eligibilityLoadingStep,+showMappingTrace` — a leading `-` turns a flag off, `+` or no
+// `?ff=-eligibilityLoadingStep,+showCarrierRequest` — a leading `-` turns a flag off, `+` or no
 // prefix turns it on. Unknown names are ignored so a stale link never breaks the page.
 function resolveFlags(ff?: string | string[]): Flags {
   const flags: Flags = { ...FLAG_DEFAULTS };

@@ -1,29 +1,33 @@
 import Link from 'next/link';
 import type { Product } from '@/lib/products';
+import { ArrowIcon, HomeIcon } from './ui/icons';
 
 function ProductPicker({ products }: { products: readonly Product[] }) {
   return (
-    <section aria-labelledby="product-picker-heading" className="space-y-6">
-      <div className="space-y-2">
-        <h1
-          id="product-picker-heading"
-          className="text-2xl font-semibold tracking-tight sm:text-3xl"
-        >
+    <section aria-labelledby="product-picker-heading" className="animate-enter space-y-6">
+      <div className="space-y-1">
+        <h1 id="product-picker-heading" className="text-2xl font-bold">
           What would you like to insure?
         </h1>
-        <p className="text-slate-600">We’ll use the details you’ve already given us.</p>
+        <p className="text-[15px]">We’ll use the details you’ve already given us.</p>
       </div>
-      <ul className="grid gap-3 sm:grid-cols-2">
+      <ul className="space-y-3">
         {products.map((product) => (
           <li key={product.id}>
             <Link
               href={`/quote/${product.id}`}
-              className="block rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-500 hover:shadow"
+              className="panel group flex items-center gap-4 p-4 transition hover:border-primary hover:bg-soft"
             >
-              <span className="block text-lg font-medium">{product.label}</span>
-              {product.description && (
-                <span className="mt-1 block text-sm text-slate-600">{product.description}</span>
-              )}
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-soft text-primary">
+                <HomeIcon className="size-5" />
+              </span>
+              <span className="flex-1">
+                <span className="block font-bold text-ink">{product.label}</span>
+                {product.description && (
+                  <span className="block text-sm">{product.description}</span>
+                )}
+              </span>
+              <ArrowIcon className="size-4 text-ink transition group-hover:translate-x-1" />
             </Link>
           </li>
         ))}

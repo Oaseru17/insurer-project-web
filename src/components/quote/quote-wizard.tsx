@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { FormRenderer } from '@/components/form/form-renderer';
 import type { Schemas } from '@/lib/api';
 import { isAnswered } from '@/lib/form/display';
 import { type Answers, setAnswer, visibleFields } from '@/lib/form/visibility';
+import { ArrowIcon } from '../ui/icons';
 import { ErrorSummary } from './error-summary';
+import { GreyFrame } from './grey-frame';
 import { ProfileAnswers } from './profile-answers';
 import { ReviewStep } from './review-step';
 import type { QuoteServices } from './services';
@@ -17,12 +19,32 @@ interface QuoteWizardProps {
   asOf: string;
   services: QuoteServices;
   onIneligible: (reasons: Schemas['Reason'][]) => void;
+  showCarrierRequest?: boolean;
+  title?: string;
+  topRight?: ReactNode;
 }
 
 type Load =
   | { status: 'loading' }
   | { status: 'error'; message: string }
   | { status: 'ready'; form: Schemas['FormDefinition']; prefill: Schemas['PrefillResponse'] };
+
+// Placeholder lines while the questions load.
+function QuestionsSkeleton() {
+  return (
+    <div className="space-y-5" aria-hidden="true">
+      <div className="placeholder-line h-10 w-full" />
+      <div className="placeholder-line w-1/4" />
+      <div className="placeholder-line h-5 w-2/5" />
+      <div className="space-y-3 pt-2">
+        <div className="placeholder-line w-full" />
+        <div className="placeholder-line w-5/6" />
+        <div className="placeholder-line w-2/3" />
+      </div>
+      <div className="placeholder-line h-10 w-full" />
+    </div>
+  );
+}
 
 function QuoteWizard(props: QuoteWizardProps) {
   const { carrierId, customerId, services } = props;
@@ -44,12 +66,23 @@ function QuoteWizard(props: QuoteWizardProps) {
     };
   }, [carrierId, customerId, services]);
 
-  if (load.status === 'loading') return <p className="text-slate-600">Loading your questions…</p>;
+  const wrap = (content: ReactNode) => (
+    <GreyFrame title={props.title ?? 'Get a quote'} backHref="/" right={props.topRight}>
+      {content}
+    </GreyFrame>
+  );
+
+  if (load.status === 'loading')
+    return wrap(
+      <div role="status" aria-label="Loading your questions">
+        <QuestionsSkeleton />
+      </div>,
+    );
   if (load.status === 'error')
-    return (
-      <p role="alert" className="rounded-lg bg-red-50 p-4 text-red-800">
+    return wrap(
+      <p role="alert" className="message-negative">
         {load.message}
-      </p>
+      </p>,
     );
   return <Steps {...props} form={load.form} prefill={load.prefill} />;
 }
@@ -70,6 +103,9 @@ function Steps({
   asOf,
   services,
   onIneligible,
+  showCarrierRequest = true,
+  title = 'Get a quote',
+  topRight,
   form,
   prefill,
 }: QuoteWizardProps & { form: Schemas['FormDefinition']; prefill: Schemas['PrefillResponse'] }) {
@@ -78,7 +114,7 @@ function Steps({
   const [step, setStep] = useState(0);
   const [editing, setEditing] = useState<ReadonlySet<string>>(new Set());
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [busy, setBusy] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [quote, setQuote] = useState<Schemas['QuoteResponse'] | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
 
@@ -114,27 +150,21 @@ function Steps({
     setStep(index);
   };
 
-  const next = async () => {
+  // Eligibility is checked before the questions and again on submit, not on every step.
+  const next = () => {
     const missing = Object.fromEntries(
       asked
         .filter((field) => field.required && !isAnswered(answers[field.key]))
         .map((field) => [field.key, `${field.label} is required`]),
     );
     if (Object.keys(missing).length > 0) return setErrors(missing);
-
-    setBusy(true);
-    const eligibility = await services.checkEligibility(carrierId, { customerId, asOf, answers });
-    setBusy(false);
-    if (eligibility.ok && eligibility.data.status === 'ineligible') {
-      return onIneligible(eligibility.data.reasons);
-    }
     goTo(step + 1);
   };
 
   const submit = async () => {
-    setBusy(true);
+    setSubmitting(true);
     const result = await services.createQuote(carrierId, { customerId, asOf, answers });
-    setBusy(false);
+    setSubmitting(false);
     if (result.ok) return setQuote(result.data);
     if (result.status === 422) return onIneligible(result.error.reasons ?? []);
     const issues = Object.fromEntries(
@@ -150,66 +180,79 @@ function Steps({
     } else setErrors({ form: result.error.message });
   };
 
-  if (quote) return <SubmittedView quote={quote} />;
-
+  const stepCount = sections.length + 1;
   return (
-    <div className="space-y-5">
-      <div className="space-y-1">
-        <p className="text-sm font-medium text-blue-700">
-          {isReview ? 'Last step' : `Step ${step + 1} of ${sections.length}`}
-        </p>
-        <h2
-          ref={heading}
-          tabIndex={-1}
-          className="text-xl font-semibold focus-visible:outline-none"
-        >
-          {isReview ? 'Review your answers' : section?.title}
-        </h2>
-      </div>
-
-      <ErrorSummary errors={errors} />
-
-      {isReview ? (
-        <ReviewStep sections={sections} visible={visible} answers={answers} onEdit={goTo} />
+    <GreyFrame
+      title={title}
+      stepLabel={quote ? 'Done' : `${step + 1} of ${stepCount}`}
+      progress={{ total: stepCount, current: quote ? stepCount - 1 : step }}
+      onBack={!quote && step > 0 ? () => goTo(step - 1) : undefined}
+      backHref="/"
+      right={topRight}
+    >
+      {quote ? (
+        <SubmittedView quote={quote} showCarrierRequest={showCarrierRequest} />
       ) : (
-        <>
-          <ProfileAnswers
-            fields={fromProfile}
-            answers={answers}
-            onChange={(key) => setEditing((current) => new Set([...current, key]))}
-          />
-          <FormRenderer
-            fields={asked}
-            values={answers}
-            onChange={(key, value) => setAnswers((current) => setAnswer(current, key, value))}
-            hints={hints}
-            errors={errors}
-          />
-        </>
-      )}
-
-      <div className="flex items-center justify-between gap-3 pt-2">
-        {step > 0 ? (
+        <div key={step} className="animate-enter space-y-6">
+          <div className="space-y-1">
+            <h2
+              ref={heading}
+              tabIndex={-1}
+              className="text-2xl font-bold tracking-[-0.02em] focus-visible:outline-none"
+            >
+              {isReview ? 'Review your answers' : section?.title}
+            </h2>
+            <p className="text-[15px] text-ink-muted">
+              {isReview
+                ? 'Check everything, then get your quote.'
+                : 'Answer what we don’t already know.'}
+            </p>
+          </div>
+          <ErrorSummary errors={errors} />
+          {isReview ? (
+            <ReviewStep sections={sections} visible={visible} answers={answers} onEdit={goTo} />
+          ) : (
+            <>
+              <ProfileAnswers
+                fields={fromProfile}
+                answers={answers}
+                onChange={(key) => setEditing((current) => new Set([...current, key]))}
+              />
+              <FormRenderer
+                fields={asked}
+                values={answers}
+                onChange={(key, value) => setAnswers((current) => setAnswer(current, key, value))}
+                hints={hints}
+                errors={errors}
+              />
+            </>
+          )}
           <button
             type="button"
-            onClick={() => goTo(step - 1)}
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2"
+            onClick={() => (isReview ? void submit() : next())}
+            disabled={submitting}
+            aria-busy={submitting || undefined}
+            className="button-primary group w-full overflow-hidden pr-0"
           >
-            Back
+            {submitting ? (
+              <span className="flex items-center gap-2 pr-8 sm:pr-10">
+                <span className="loader size-4 text-white" aria-hidden="true" />
+                Getting your quote…
+              </span>
+            ) : (
+              <>
+                <span className="flex-1 pl-12 text-center">
+                  {isReview ? 'Get quote' : 'Continue'}
+                </span>
+                <span className="-my-3.5 flex items-center self-stretch bg-black/10 px-4">
+                  <ArrowIcon className="size-4 transition group-hover:translate-x-0.5" />
+                </span>
+              </>
+            )}
           </button>
-        ) : (
-          <span />
-        )}
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => void (isReview ? submit() : next())}
-          className="rounded-lg bg-blue-600 px-5 py-2 font-medium text-white disabled:opacity-60"
-        >
-          {isReview ? 'Get quote' : 'Next'}
-        </button>
-      </div>
-    </div>
+        </div>
+      )}
+    </GreyFrame>
   );
 }
 
