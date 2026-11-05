@@ -168,3 +168,24 @@
 @utility loader {
   @apply inline-block size-[1.2em] animate-spin rounded-full border-[0.2em] border-current/25 border-t-current;
 }
+
+/* Calendar (react-day-picker) in Olli colours and the app font. */
+.rdp-root {
+  --rdp-accent-color: var(--color-primary);
+  --rdp-accent-background-color: var(--color-soft);
+  --rdp-today-color: var(--color-primary-text);
+  --rdp-day-height: 40px;
+  --rdp-day-width: 40px;
+  --rdp-day_button-height: 38px;
+  --rdp-day_button-width: 38px;
+  --rdp-day_button-border-radius: 9999px;
+  font-size: 14px;
+  color: var(--color-ink);
+}
+.rdp-root .rdp-selected .rdp-day_button {
+  background: var(--color-primary);
+  color: #fff;
+}
+.rdp-root .rdp-caption_label {
+  font-weight: 700;
+}
