@@ -2,7 +2,7 @@
 // customer id — never profile data.
 const DEMO_CUSTOMER_IDS = ['a', 'b'] as const;
 const DEFAULT_CUSTOMER_ID = 'a';
-const CUSTOMER_COOKIE = 'olli_customer';
+const CUSTOMER_COOKIE = 'demo_customer';
 
 interface DemoCustomer {
   id: string;

@@ -1,12 +1,12 @@
-# Olli web
+# Insurer project web
 
-The Next.js front end for Olli's carrier quotes; the first carrier is **Harbor Assurance** (renters). It
+The Next.js front end for the insurer project's carrier quotes; the first carrier is **Harbor Assurance** (renters). It
 renders the carrier's form from the JSON the API serves, pre-fills what the customer's profile already
 answers, asks only for what's missing, and shows clearly why a carrier can't quote someone.
 
 **The full write-up** — field mapping, eligibility, assumptions, architecture, the 50-carrier design and
 what I'd do with more time — is in the
-[olli-backend-service README](https://github.com/Oaseru17/olli-backend-service#readme).
+[insurer-project-backend-service README](https://github.com/Oaseru17/insurer-project-backend-service#readme).
 
 ## Run it
 
@@ -14,14 +14,14 @@ The web needs the API, so run both repos side by side. Requires **Node 22+** (`.
 
 ```bash
 # 1. The API — http://localhost:4000
-git clone https://github.com/Oaseru17/olli-backend-service.git
-cd olli-backend-service
+git clone https://github.com/Oaseru17/insurer-project-backend-service.git
+cd insurer-project-backend-service
 npm install
 npm run dev
 
 # 2. The web (in a second terminal) — http://localhost:3000
-git clone https://github.com/Oaseru17/olli-web.git
-cd olli-web
+git clone https://github.com/Oaseru17/insurer-project-web.git
+cd insurer-project-web
 npm install
 npm run dev
 ```

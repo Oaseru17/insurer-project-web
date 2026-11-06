@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { BackIcon } from '../ui/icons';
-import { OlliLogo } from '../ui/logo';
+import { Logo } from '../ui/logo';
 
 interface GreyFrameProps {
   title: string;
@@ -43,8 +43,8 @@ function GreyFrame({
                 {back}
               </Link>
             ) : null}
-            <Link href="/" aria-label="Olli home" className="shrink-0 rounded-ui px-1">
-              <OlliLogo className="h-6 w-auto" />
+            <Link href="/" aria-label="Home" className="shrink-0 rounded-ui px-1">
+              <Logo className="h-6" />
             </Link>
             <p className="truncate pl-1 text-[15px] font-medium text-ink">
               {title}

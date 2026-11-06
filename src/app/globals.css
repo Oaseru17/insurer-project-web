@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-/* Olli brand (olli.insure --olli-* tokens) in a Grey-style onboarding layout (app.grey.co/auth/register). */
+/* Brand tokens in a Grey-style onboarding layout (app.grey.co/auth/register). */
 @theme {
   --font-sans: var(--font-dm-sans), sans-serif;
   --color-ink: #050505;
@@ -135,7 +135,7 @@
   @apply input appearance-none bg-[url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23050505'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='m6%209%206%206%206-6'/%3E%3C/svg%3E")] bg-[length:18px] bg-[position:right_14px_center] bg-no-repeat pr-10;
 }
 
-/* Olli magenta button; a darker circle grows to fill it on hover. */
+/* Primary button; a darker circle grows to fill it on hover. */
 @utility button-primary {
   @apply relative z-0 inline-flex min-h-[50px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-ui bg-primary px-8 font-bold text-white shadow-[0_1px_2px_rgb(16_24_40/0.08)] transition-colors duration-500 select-none before:absolute before:top-1/2 before:left-1/2 before:-z-10 before:aspect-square before:w-[130%] before:-translate-x-1/2 before:-translate-y-1/2 before:scale-0 before:rounded-full before:bg-ink before:transition-transform before:duration-500 before:ease-[cubic-bezier(0.1,0,0.3,1)] before:content-[''] hover:before:scale-100 disabled:cursor-default disabled:opacity-60 disabled:before:scale-0;
 }
@@ -169,7 +169,7 @@
   @apply inline-block size-[1.2em] animate-spin rounded-full border-[0.2em] border-current/25 border-t-current;
 }
 
-/* Calendar (react-day-picker) in Olli colours and the app font. */
+/* Calendar (react-day-picker) in the brand colours and the app font. */
 .rdp-root {
   --rdp-accent-color: var(--color-primary);
   --rdp-accent-background-color: var(--color-soft);

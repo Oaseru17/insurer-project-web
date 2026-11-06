@@ -10,7 +10,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Olli — Insurance made easy',
+  title: 'Insurer project — renters quote',
   description: 'Get a renters insurance quote using the details you already gave us.',
 };
 
