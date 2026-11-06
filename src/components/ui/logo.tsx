@@ -1,23 +1,13 @@
-import Image from 'next/image';
-
-// Olli wordmark (black with magenta dot), from olli.insure brand assets.
-function OlliLogo({
-  className,
-  variant = 'dark',
-}: {
-  className?: string;
-  variant?: 'dark' | 'light';
-}) {
+// Text wordmark for the insurer project, set in the app font.
+function Logo({ className, variant = 'dark' }: { className?: string; variant?: 'dark' | 'light' }) {
+  const colour = variant === 'dark' ? 'text-ink' : 'text-white';
   return (
-    <Image
-      src={variant === 'dark' ? '/brand/olli-logo.png' : '/brand/olli-logo-white.png'}
-      alt="Olli"
-      width={1305}
-      height={653}
-      priority
-      className={className}
-    />
+    <span
+      className={`inline-flex items-center text-lg font-bold tracking-tight ${colour} ${className ?? ''}`}
+    >
+      insurer project
+    </span>
   );
 }
 
-export { OlliLogo };
+export { Logo };
